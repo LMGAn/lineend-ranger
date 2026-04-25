@@ -31,3 +31,7 @@ The plugin works automatically after installation, no additional configuration r
 
 # feature show
 ![feeature show](./image.png)
+
+
+# GitHub仓库地址
+[ <font size='10'>Welcome!!!<font/> ](https://github.com/LMGAn/lineend-ranger)
