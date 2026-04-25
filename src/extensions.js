@@ -1,108 +1,70 @@
 const vscode = require("vscode");
 
-let decorationType = null;
-let currentCursorLine = 0;
+let decorationType = vscode.window.createTextEditorDecorationType({
+  isWholeLine: false,
+});
 
 /**
  * 检测当前是否为深色主题
- * @returns {boolean}
  */
 function isDarkTheme() {
-  const colorTheme = vscode.workspace
-    .getConfiguration("workbench")
-    .get("colorTheme");
-  // 常见的深色主题名称关键词
-  const darkThemeKeywords = [
-    "dark",
-    "dim",
-    "night",
-    "black",
-    "monokai",
-    "one dark",
-    "dracula",
-    "synthwave",
-    "arc dark",
-    "deep",
-  ];
+  const colorTheme = vscode.workspace.getConfiguration("workbench").get("colorTheme");
+  const darkThemeKeywords = ["dark", "dim", "night", "black", "monokai", "one dark", "dracula", "synthwave", "arc dark", "deep"];
   const themeLower = (colorTheme || "").toLowerCase();
   return darkThemeKeywords.some(keyword => themeLower.includes(keyword));
 }
 
 /**
- * 获取当前行的背景颜色（根据主题）
- * @returns {string|undefined}
+ * 获取渲染选项
  */
-function getCurrentLineBackgroundColor() {
-  if (isDarkTheme()) {
-    // 深色主题：使用较暗的颜色
-    return "#3d3d3d";
-  } else {
-    // 浅色主题：使用浅绿色
-    return "#e0ffe0";
-  }
+function getLineOptions(lineIndex, currentCursorLine) {
+  const isCurrentLine = lineIndex === currentCursorLine;
+  const displayText = isCurrentLine ? String(lineIndex + 1) : String(Math.abs(lineIndex - currentCursorLine));
+  
+  const isDark = isDarkTheme();
+  const textColor = isCurrentLine ? (isDark ? "#4fc3f7" : "#333333") : "#888888";
+  const bgColor = isCurrentLine ? (isDark ? "#3d3d3d" : "#e0ffe0") : undefined;
+
+  return {
+    contentText: displayText,
+    color: textColor,
+    fontWeight: isCurrentLine ? "bold" : "normal",
+    backgroundColor: bgColor,
+    margin: "0 0 0 10px",
+  };
 }
 
 /**
- * 获取当前行的文字颜色（根据主题）
- * @returns {string}
- */
-function getCurrentLineTextColor() {
-  if (isDarkTheme()) {
-    // 深色主题：使用亮色文字
-    return "#4fc3f7";
-  } else {
-    // 浅色主题：使用深色文字
-    return "#333333";
-  }
-}
-function createDecorationType() {
-  if (decorationType) {
-    decorationType.dispose();
-  }
-  decorationType = vscode.window.createTextEditorDecorationType({
-    isWholeLine: false,
-    after: {
-      margin: "0 0 0 10px",
-      color: "#888888",
-    },
-  });
-  return decorationType;
-}
-
-/**
- * 渲染相对行号（仅end模式）
- * @param {vscode.TextEditor} editor
+ * 渲染相对行号
  */
 function renderLineNumbers(editor) {
   if (!editor) return;
+
   const doc = editor.document;
   const decorations = [];
   const cursorPos = editor.selection.active;
-  currentCursorLine = cursorPos.line;
-  for (let i = 0; i < doc.lineCount; i++) {
-    const line = doc.lineAt(i);
-    let displayText;
-    if (i === currentCursorLine) {
-      displayText = String(i + 1);
-    } else {
-      displayText = String(Math.abs(i - currentCursorLine));
+  const currentCursorLine = cursorPos.line;
+
+  // 仅针对可见区域进行渲染，提高性能
+  // 注意：为了平滑滚动，我们可以稍微扩大一点渲染范围
+  editor.visibleRanges.forEach(range => {
+    const startLine = Math.max(0, range.start.line - 10);
+    const endLine = Math.min(doc.lineCount - 1, range.end.line + 10);
+
+    for (let i = startLine; i <= endLine; i++) {
+      const line = doc.lineAt(i);
+      const pos = line.range.end;
+      
+      decorations.push({
+        range: new vscode.Range(pos, pos),
+        renderOptions: {
+          after: getLineOptions(i, currentCursorLine)
+        },
+      });
     }
-    let pos = line.range.end;
-    let afterOptions = {
-      contentText: displayText,
-      color: i === currentCursorLine ? getCurrentLineTextColor() : "#888888",
-      fontWeight: i === currentCursorLine ? "bold" : "normal",
-      backgroundColor:
-        i === currentCursorLine ? getCurrentLineBackgroundColor() : undefined,
-      margin: "0 0 0 10px",
-    };
-    decorations.push({
-      range: new vscode.Range(pos, pos),
-      renderOptions: { after: afterOptions },
-    });
-  }
-  const type = createDecorationType();
-  editor.setDecorations(type, decorations);
+  });
+
+  editor.setDecorations(decorationType, decorations);
 }
 
 /**
@@ -135,6 +97,17 @@ function activate(context) {
   vscode.workspace.onDidChangeTextDocument(
     event => {
       if (activeEditor && event.document === activeEditor.document) {
+        triggerUpdateDecorations();
+      }
+    },
+    null,
+    context.subscriptions,
+  );
+
+  // 监听可见区域变化（滚动）
+  vscode.window.onDidChangeTextEditorVisibleRanges(
+    event => {
+      if (activeEditor && event.textEditor === activeEditor) {
         triggerUpdateDecorations();
       }
     },
