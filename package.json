@@ -1,7 +1,7 @@
 {
   "name": "lineend-ranger",
   "displayName": "LineEnd Ranger",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "在每行末尾显示相对行号。当前光标所在行显示真实行号，其他行显示相对行号。Display relative line numbers at the end of each line. Current cursor line shows absolute line number, other lines show relative numbers.",
   "engines": {
     "vscode": "^1.105.0"
