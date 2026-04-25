@@ -30,7 +30,7 @@ The plugin works automatically after installation, no additional configuration r
 
 
 # feature show
-![feeature show](./image.png)
+![feeature show](./images/image.png)
 
 
 # GitHub仓库地址
