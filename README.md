@@ -1,6 +1,6 @@
-<font color='red'>
-该插件适用于使用VS Code-Vim插件的人使用
-<font/>
+
+# 该插件适用于使用VS Code-Vim插件的人使用
+
 # 功能
 
 在每行文本末尾显示行号，类似 VS Code 原生的相对行号功能，但显示在行尾。
