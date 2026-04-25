@@ -1,5 +1,5 @@
 
-# 该插件适用于使用VS Code-Vim插件的人使用
+# 本插件适合正在使用 VS Code 的 Vim 模拟器（VSCodeVim）的用户
 
 # 功能
 
