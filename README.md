@@ -33,7 +33,7 @@ The plugin works automatically after installation, no additional configuration r
 
 
 # feature show
-![feeature show](./images/image.png)
+![feeature show](https://github.com/LMGAn/lineend-ranger/blob/main/images/image.png?raw=true)
 
 
 # GitHub仓库地址
