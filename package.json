@@ -6,7 +6,7 @@
   "engines": {
     "vscode": "^1.105.0"
   },
-  "main": "extensions.js",
+  "main": "./src/extensions.js",
   "activationEvents": [
     "onLanguage:javascript",
     "onLanguage:typescript",
